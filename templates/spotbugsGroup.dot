@@ -1,0 +1,17 @@
+<details class="group">
+  <summary class="groupTitle">{{=it.name}}</summary>
+  {{? it.items.length }}
+    <details class="item">
+      <summary>Items ({{=it.items.length}})</summary>
+      {{ for(var prop in it.items) { }}
+        <div class="item">
+          <div class="itemLocation">{{=it.items[prop].sourceFile}} : {{=it.items[prop].sourceLine}}</div>
+          <div  class="itemDescription">{{=it.items[prop].bugId}} : {{=it.items[prop].bugDescription}}</div>
+        </div>
+      {{ } }}
+    </details>
+  {{?}}
+  {{? it.children }}
+      {{=it.children}}
+  {{?}}
+</details>

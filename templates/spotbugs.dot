@@ -1,0 +1,14 @@
+<html>
+<head>
+	<style>
+		.group {color:red;}
+		.groupTitle {color:blue;}
+		.items {color:blue;}
+		.item {color:blue;}
+		.itemLocation {color:blue;}
+		.itemDescription {color:blue;}
+	</style>
+</head>
+<body>
+	{{=it.content}}
+</body>
