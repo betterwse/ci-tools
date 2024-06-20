@@ -1,5 +1,7 @@
 require("./junit-parser");
 require("./spotbugs-parser");
+require("./checkstyle-parser");
+
 import { commandHandler } from "./command-handler";
 
 const args = process.argv.slice(2);

@@ -15,7 +15,7 @@ interface SpotBugsResultItem {
   bugDescription: string;
 }
 
-const ROW_PARSER = new RegExp(/(.*): (.*)[Aa]t(.*):\[line ([0-9]+)/);
+const ROW_PARSER = new RegExp(/(.*): (.*)[Aa]t (.*):\[line ([0-9]+)/);
 interface GroupCollector {
   collecting: boolean;
   result: string[];
@@ -65,7 +65,7 @@ const parseFile = async (fileName: string): Promise<SpotBugsResultItem[]> => {
         }
       }
       return {
-        groupName,
+        groupName: [...groupName, parts[3]?.trim() ?? "UNKNOWN"],
         sourceFile: parts[3]?.trim() ?? "UNKNOWN",
         sourceLine: parseInt(parts[4] ?? -1),
         bugId: parts[1]?.trim() ?? "UNKNOWN",
@@ -81,15 +81,26 @@ interface SpotBugsResultGroup {
   name: string;
   children: SpotBugsResultGroup[];
   items: SpotBugsResultItem[];
+  itemCount: number;
 }
 
 const renderGroup = (group: SpotBugsResultGroup, level = 0): string => {
   const children = group.children.map((c) => renderGroup(c, level + 1)).join("");
+  if(level === 0){
+    return dots.spotbugsTitle({
+      name: group.name,
+      children: children,
+      items: group.items,
+      level,
+      itemCount: group.itemCount,
+    });
+  }
   return dots.spotbugsGroup({
     name: group.name,
     children: children,
     items: group.items,
     level,
+    itemCount: group.itemCount,
   });
 }
 
@@ -110,6 +121,7 @@ const spotbugsParser = async (args: string[]): Promise<CommandResult> => {
     name: "Spotbugs Result",
     children: [],
     items: [],
+    itemCount: 0,
   };
   items.forEach((item) => {
     const groupEntry: SpotBugsResultGroup = item.groupName
@@ -122,15 +134,17 @@ const spotbugsParser = async (args: string[]): Promise<CommandResult> => {
         // Create new entry
         const newChild = {
           groupPartName: i,
-          name: groupItem.groupPartName + "/" + i,
+          name: i,
           children: [],
           items: [],
+          itemCount: 0,
         };
         groupItem.children.push(newChild);
         return newChild;
       }, groupRoot);
     groupEntry.items.push(item);
   });
+  calculateItemCount(groupRoot);
 
   // Generate
   const content = renderGroup(groupRoot);
@@ -139,21 +153,17 @@ const spotbugsParser = async (args: string[]): Promise<CommandResult> => {
   });
   await fs.writeFile(path.join(options.outDir, "spotbugs.html"), report);
 
-
-  //console.log(JSON.stringify(groupRoot, null, 2));
-
-  // Generate report
-  //console.log(dots.spotbugs({
-  //  result: groupRoot,
- //}));
-
   return {
     exitStatus: 1,
-    
   }
 }
 
+const calculateItemCount = (node: SpotBugsResultGroup):number=>{
+  const childcount = node.children.reduce((p, c) =>{
+    return calculateItemCount(c) + p
+  }, 0)
+  node.itemCount = childcount + node.items.length;
+  return node.itemCount;
+}
+
 commandHandler.register(COMMAND_NAME, spotbugsParser);
-
-
-

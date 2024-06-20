@@ -1,5 +1,4 @@
-<details class="group">
-  <summary class="groupTitle">{{=it.name}}({{=it.itemCount}})</summary>
+  <h1 class="groupTitle">{{=it.name}}({{=it.itemCount}})</h1>
   {{? it.items.length }}
       {{ for(var prop in it.items) { }}
         <div class="item">
@@ -11,4 +10,3 @@
   {{? it.children }}
       {{=it.children}}
   {{?}}
-</details>
