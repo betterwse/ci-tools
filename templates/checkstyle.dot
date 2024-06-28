@@ -1,0 +1,38 @@
+<html>
+<head>
+	<style>
+		body{
+			color: black;
+			font-family: monospace;
+			font-weight: bold;
+		}
+		.group{
+			border: 1px solid black;
+			border-radius: 10px;
+			margin: 10px;
+			padding: 10px;	
+		}
+		.item {
+			border: 1px solid black;
+			border-radius: 10px;
+			padding: 10px;
+			margin: 10px;
+		}
+		.itemLocation {
+			color:green;
+			border-top: 1px dashed black;
+			margin-top: 10px;
+			padding-top: 10px;
+		}
+		.itemDescription {
+			color:red;
+		}
+		.warning {
+			color: orange;
+		}
+		
+	</style>
+</head>
+<body>
+	{{=it.content}}
+</body>

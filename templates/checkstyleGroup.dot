@@ -1,0 +1,14 @@
+<details class="group">
+  <summary class="groupTitle">{{=it.name}}({{=it.itemCount}})</summary>
+  {{? it.items.length }}
+      {{ for(var prop in it.items) { }}
+        <div class="item">
+          <div  class="itemDescription {{? it.items[prop].severity === "warning" }}warning{{?}}">{{=it.items[prop].bugDescription}}</div>
+          <div class="itemLocation">{{=it.items[prop].sourceFile}} : {{=it.items[prop].sourceLine}},{{=it.items[prop].sourceColumn}}</div>
+        </div>
+      {{ } }}
+  {{?}}
+  {{? it.children }}
+      {{=it.children}}
+  {{?}}
+</details>
