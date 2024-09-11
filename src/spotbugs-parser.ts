@@ -87,7 +87,7 @@ interface SpotBugsResultGroup {
 const renderGroup = (group: SpotBugsResultGroup, level = 0): string => {
   const children = group.children.map((c) => renderGroup(c, level + 1)).join("");
   if(level === 0){
-    return dots.resultTitle({
+    return dots.spotbugsTitle({
       name: group.name,
       children: children,
       items: group.items,

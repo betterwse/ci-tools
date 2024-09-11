@@ -1,0 +1,44 @@
+<html>
+<head>
+	<style>
+		body{
+			color: black;
+			font-family: monospace;
+			font-weight: bold;
+		}
+		.group{
+			border: 1px solid black;
+			border-radius: 10px;
+			margin: 10px;
+			padding: 10px;	
+		}
+		.item {
+			border: 1px solid black;
+			border-radius: 10px;
+			padding: 10px;
+			margin: 10px;
+		}
+		.itemDescription {
+			border-top: 1px dashed black;
+			margin-top: 10px;
+			padding-top: 10px;
+		}
+		.success {
+			background-color: green;
+		}
+		.failure {
+			background-color: red;
+		}
+		.error {
+			background-color: red;
+		}
+		.skipped {
+			background-color: gray;
+		}
+
+		
+	</style>
+</head>
+<body>
+	{{=it.content}}
+</body>

@@ -30,7 +30,7 @@ interface CheckstyleResultGroup {
 const renderGroup = (group: CheckstyleResultGroup, level = 0): string => {
   const children = group.children.map((c) => renderGroup(c, level + 1)).join("");
   if(level === 0){
-    return dots.resultTitle({
+    return dots.checkstyleTitle({
       name: group.name,
       children: children,
       items: group.items,
@@ -61,8 +61,6 @@ const checkStyleParser = async (args: string[]): Promise<CommandResult> => {
   const parser = new XMLParser(parserOptions);
   let errors = parser.parse(data, true).checkstyle.file.filter(e=>e.error);
   
-
-
 
   const formattedErrors = errors
   .flatMap((row): CheckstyleResultItem [] => {

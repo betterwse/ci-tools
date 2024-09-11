@@ -1,0 +1,16 @@
+<details class="group">
+  <summary class="groupTitle">{{=it.name}}({{=it.itemCount.tests}},{{=it.itemCount.skipped}},{{=it.itemCount.failures}},{{=it.itemCount.errors}})</summary>
+  {{? it.items.length }}
+      {{ for(var prop in it.items) { }}
+        <div class="item {{=it.items[prop].result}}">
+          <div class="itemName">{{=it.items[prop].testName}}</div>
+          {{? it.items[prop].result !== "success" }}
+            <div  class="itemDescription">{{=it.items[prop].bugDescription}}</div>
+          {{?}}
+        </div>
+      {{ } }}
+  {{?}}
+  {{? it.children }}
+      {{=it.children}}
+  {{?}}
+</details>

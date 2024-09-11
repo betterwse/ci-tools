@@ -1,0 +1,4 @@
+  <h1 class="groupTitle">{{=it.name}}({{=it.itemCount.tests}},{{=it.itemCount.skipped}},{{=it.itemCount.failures}},{{=it.itemCount.errors}})</h1>
+  {{? it.children }}
+      {{=it.children}}
+  {{?}}
