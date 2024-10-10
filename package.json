@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "rm -rf build/templates && cp -r templates build && tsc"
+  "prepare": "rm -rf build/templates && cp -r templates build && tsc",
+  "build": "rm -rf build/templates && cp -r templates build && tsc"
+  },
+  "bin": {
+    "bw-ci-tools": "build/index.js"
   },
   "author": "",
   "license": "ISC",

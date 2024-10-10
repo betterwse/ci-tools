@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 require("./junit-parser");
 require("./spotbugs-parser");
 require("./checkstyle-parser");
