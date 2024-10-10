@@ -2,7 +2,7 @@ import { OptDict } from "./common";
 
 export type CommandExecutor = (commandArgs: string[]) => Promise<CommandResult>;
 export interface CommandResult {
-  exitStatus: number;
+  errorCount: number;
   output?: string[];
 }
 

@@ -3,7 +3,7 @@ const fs = require('fs').promises;
 var dots = require("dot").process({ path: path.join(__dirname, "templates")});
 
 import { CommandResult, commandHandler } from "./command-handler";
-import { parseParserOptions } from "./common";
+import { parseParserOptions, readSourceDir } from "./common";
 
 const { XMLParser, XMLBuilder, XMLValidator} = require("fast-xml-parser");
 const COMMAND_NAME = "junit";
@@ -30,13 +30,6 @@ interface JunitResultGroup {
 }
 
 const renderGroup = (group: JunitResultGroup, level = 0, add : string[] = []): string => {  
-  if((group.children.length === 1 || group.items.length === 0)){
-    add.push(group.children[0].name); 
-    if(level !== 0){
-      return renderGroup(group.children[0], level+1, add)
-    }
-  } 
-  
   if(level === 0){
     const children = group.children.map((c) => renderGroup(c, level + 1,add)).join("");
     return dots.junitTitle({
@@ -52,6 +45,7 @@ const renderGroup = (group: JunitResultGroup, level = 0, add : string[] = []): s
   return dots.junitGroup({
     name: add.length?add.join("/"):group.name,
     children: children,
+    hasError: (group.itemCount.errors + group.itemCount.failures) > 0,
     items: group.items,
     level,
     itemCount: group.itemCount,
@@ -63,8 +57,9 @@ const junitParser = async (args: string[]): Promise<CommandResult> => {
   let results:any[] = [];
   //get data
   const options = parseParserOptions(args);
+  const files = await readSourceDir(path.join(options.sourceDir), new RegExp(/.*\.xml$/));
 
-  for(let file of options.files){
+  for(let file of files){
 
     const data = await fs.readFile(file, "UTF-8");
 
@@ -81,26 +76,25 @@ const junitParser = async (args: string[]): Promise<CommandResult> => {
     results = [...results, ...parsed];
   }
 
-  const formattedErrors = results
-  .map((row): JunitResultItem => {
-    const groupName: string[] = row.classname.split(".");
-    let result:resultType = "success";
-    if(row.failure){
-      result = "failure";
-    } else if(row.skipped){
-      result = "skipped";
-    } else if(row.error){
-      result = "error";
-    }
+  const formattedItems = results
+    .map((row): JunitResultItem => {
+      const groupName: string[] = row.classname.split(".");
+      let result:resultType = "success";
+      if(row.failure){
+        result = "failure";
+      } else if(row.skipped){
+        result = "skipped";
+      } else if(row.error){
+        result = "error";
+      }
 
-    return {
-      groupName,
-      testName: row.name, 
-      bugDescription: row.failure?.message,
-      result,
-    }
-  })
-    
+      return {
+        groupName,
+        testName: row.name, 
+        bugDescription: row.failure?.message,
+        result,
+      }
+    });
 
   // Prepare data, sort and group
   const groupRoot: JunitResultGroup = {
@@ -115,7 +109,7 @@ const junitParser = async (args: string[]): Promise<CommandResult> => {
       errors: 0,
     },
   };
-  formattedErrors.forEach((item) => {
+  formattedItems.forEach((item) => {
     const groupEntry: JunitResultGroup = item.groupName
       .reduce((groupItem, i) => {
         const child = groupItem.children.find((c) => c.groupPartName === i);
@@ -129,14 +123,21 @@ const junitParser = async (args: string[]): Promise<CommandResult> => {
           name: i,
           children: [],
           items: [],
-          itemCount: {tests:0,skipped:0,failures:0,errors:0},
+          itemCount: {
+            tests:0,
+            skipped:0,
+            failures:0,
+            errors:0
+          },
         };
         groupItem.children.push(newChild);
         return newChild;
       }, groupRoot);
     groupEntry.items.push(item);
   });
+
   calculateItemCount(groupRoot);
+
   // Generate
   const content = renderGroup(groupRoot);
   const report = dots.junit({
@@ -145,7 +146,7 @@ const junitParser = async (args: string[]): Promise<CommandResult> => {
   await fs.writeFile(path.join(options.outDir, "junit.html"), report);
 
   return {
-    exitStatus: 1,
+    errorCount: groupRoot.itemCount.errors + groupRoot.itemCount.failures,
   }
 
 }

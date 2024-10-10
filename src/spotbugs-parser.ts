@@ -3,7 +3,10 @@ const fs = require('fs').promises;
 var dots = require("dot").process({ path: path.join(__dirname, "templates")});
 
 import { CommandResult, commandHandler } from "./command-handler";
-import { parseParserOptions } from "./common";
+import {
+  parseParserOptions,
+  readSourceDir,
+} from "./common";
 
 const COMMAND_NAME = "spotbugs";
 
@@ -74,8 +77,6 @@ const parseFile = async (fileName: string): Promise<SpotBugsResultItem[]> => {
     });
 }
 
-
-
 interface SpotBugsResultGroup {
   groupPartName: string;
   name: string;
@@ -109,8 +110,9 @@ const spotbugsParser = async (args: string[]): Promise<CommandResult> => {
   const options = parseParserOptions(args);
 
   // Collect all items
+  const files = await readSourceDir(path.join(options.sourceDir), new RegExp(/.*\.xml$/));
   const items: SpotBugsResultItem[] = []; 
-  await Promise.all(options.files.map(async (file) => {
+  await Promise.all(files.map(async (file) => {
     const parsedItems = await parseFile(file);
     items.push(...parsedItems);
   }));
@@ -154,7 +156,7 @@ const spotbugsParser = async (args: string[]): Promise<CommandResult> => {
   await fs.writeFile(path.join(options.outDir, "spotbugs.html"), report);
 
   return {
-    exitStatus: 1,
+    errorCount: groupRoot.itemCount,
   }
 }
 

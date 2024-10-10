@@ -23,14 +23,20 @@
 			margin-top: 10px;
 			padding-top: 10px;
 		}
+		.childError {
+			background-color: #f88686;
+		}
+		.childSuccess {
+			background-color: #84b284;
+		}
 		.success {
-			background-color: green;
+			background-color: #62b562;
 		}
 		.failure {
-			background-color: red;
+			background-color: #eb3939;
 		}
 		.error {
-			background-color: red;
+			background-color: #eb3939;
 		}
 		.skipped {
 			background-color: gray;

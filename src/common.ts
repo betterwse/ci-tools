@@ -1,3 +1,6 @@
+import path from "path";
+const fs = require('fs').promises;
+
 export interface OptDict<T> {
   [key: string]: T | undefined;
 }
@@ -5,13 +8,13 @@ export interface OptDict<T> {
 export interface ParserOptions {
   [key: string]: string | string[];
   outDir: string;
-  files: string[];
+  sourceDir: string;
 }
 
 const COMMAND_PREFIX = "--";
 
 const isParserOptions = (res: any): res is ParserOptions => {
-  return res.outDir != null && res.files?.length != null
+  return res.outDir != null && res.sourceDir != null
 }
 
 const toArgValue = (values: string[]): string | string[] => {
@@ -55,4 +58,24 @@ export const parseParserOptions = (args: string[]): ParserOptions  => {
   }
 
   throw new Error("failed to parse command options");
+}
+
+
+
+export const readSourceDir = async (dirName: string, nameFilter: RegExp, result: string[] = []): Promise<string[]> => {
+
+  const content = await fs.readdir(dirName);
+  for (const f of content) {
+    const stat = await fs.stat(path.join(dirName, f));
+  
+    if (stat.isDirectory()) {
+      await readSourceDir(path.join(dirName, f), nameFilter, result)
+    } else if (stat.isFile()) {
+      if (nameFilter.test(f)) {
+        result.push(path.join(dirName, f));
+      }
+    }  
+  }
+  return result;
+
 }

@@ -3,7 +3,7 @@ const fs = require('fs').promises;
 var dots = require("dot").process({ path: path.join(__dirname, "templates")});
 
 import { CommandResult, commandHandler } from "./command-handler";
-import { parseParserOptions } from "./common";
+import { parseParserOptions, readSourceDir } from "./common";
 
 const { XMLParser, XMLBuilder, XMLValidator} = require("fast-xml-parser");
 const COMMAND_NAME = "checkstyle";
@@ -51,16 +51,22 @@ const checkStyleParser = async (args: string[]): Promise<CommandResult> => {
 
   //get data
   const options = parseParserOptions(args);
-  const data = await fs.readFile(options.files[0], "UTF-8");
+  const files = await readSourceDir(path.join(options.sourceDir), new RegExp(/.*\.xml$/));
 
-  const parserOptions = {
-    ignoreAttributes: false, 
-    attributeNamePrefix : ""
-  };
+  const errors: any[] = [];
+  for (const file of files) {
+    const data = await fs.readFile(file, "UTF-8");
 
-  const parser = new XMLParser(parserOptions);
-  let errors = parser.parse(data, true).checkstyle.file.filter(e=>e.error);
-  
+    const parserOptions = {
+      ignoreAttributes: false, 
+      attributeNamePrefix : ""
+    };
+
+    const parser = new XMLParser(parserOptions);
+    const result = parser.parse(data, true)
+    const items = Array.isArray(result.checkstyle.file) ? result.checkstyle.file : [result.checkstyle.file];
+    errors.push(...items.filter(e=>e.error));
+  }
 
   const formattedErrors = errors
   .flatMap((row): CheckstyleResultItem [] => {
@@ -84,10 +90,8 @@ const checkStyleParser = async (args: string[]): Promise<CommandResult> => {
       bugDescription: error.message,
       severity: error.severity,
       }
-    })
-    
-  })
-  console.log(formattedErrors); //array av filer(filnamn, errors). Error kan vara array med objekt (om flera) eller bara objekt-
+    })    
+  });
   
   
   // Prepare data, sort and group
@@ -126,10 +130,10 @@ const checkStyleParser = async (args: string[]): Promise<CommandResult> => {
   const report = dots.checkstyle({
     content,
   });
-  await fs.writeFile(path.join(options.outDir, "checkStyle.html"), report);
+  await fs.writeFile(path.join(options.outDir, "checkstyle.html"), report);
 
   return {
-    exitStatus: 1,
+    errorCount: groupRoot.itemCount,
   }
 }
 

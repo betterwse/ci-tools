@@ -1,4 +1,4 @@
-<details class="group">
+<details class="group {{=it.hasError ? 'childError' : 'childSuccess'}}">
   <summary class="groupTitle">{{=it.name}}({{=it.itemCount.tests}},{{=it.itemCount.skipped}},{{=it.itemCount.failures}},{{=it.itemCount.errors}})</summary>
   {{? it.items.length }}
       {{ for(var prop in it.items) { }}

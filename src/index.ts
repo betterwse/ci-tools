@@ -12,11 +12,13 @@ const commandArgs = args.splice(1);
 commandHandler
   .execute(command, commandArgs)
   .then((res) => {
-    console.log(res);
+    if (res.errorCount > 0) {
+      console.error(`Validation found ${res.errorCount} issues :/`);
+      process.exit(1);
+    }
+    console.log(`Successfully executed ${command}`);
   })
   .catch((err) => {
     console.error(err);
-    process.exit(1); // TODO - ok?
+    process.exit(1);
   });
-
-console.log(command);
