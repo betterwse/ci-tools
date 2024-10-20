@@ -82,7 +82,7 @@ const junitParser = async (args: string[]): Promise<CommandResult> => {
       let result:resultType = "success";
       if(row.failure){
         result = "failure";
-      } else if(row.skipped){
+      } else if(row.skipped !== "undefined"){
         result = "skipped";
       } else if(row.error){
         result = "error";
